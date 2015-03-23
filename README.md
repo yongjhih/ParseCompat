@@ -1,6 +1,6 @@
 # Parse Compat
 
-* `ParseRecyclerAdapter<T, VH> extends RecyclerView.Adapter<T, VH>`
+* `ParseRecyclerAdapter<T, VH> extends RecyclerView.Adapter<VH>`
 
 ## Usage
 
@@ -19,6 +19,7 @@ adapter = new ParseRecyclerAdapter<Post, MyViewHolder>(this, () -> {
 };
 
 adapter.onBindViewHolder((viewHolder, position, post) -> {
+    ...
 });
 ```
 
@@ -34,7 +35,7 @@ repositories {
 }
 
 dependencies {
-    compile 'com.github.yongjhih:parse-compat:1.0.0'
+    compile 'com.github.yongjhih:ParseCompat:1.0.0'
 }
 ```
 
