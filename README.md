@@ -25,6 +25,20 @@ adapter.onBindViewHolder((viewHolder, position, post) -> {
 
 ## Installation
 
+Via bintray
+
+```gradle
+repositories {
+    maven {
+        url 'https://dl.bintray.com/yongjhih/maven/'
+    }
+}
+
+dependencies {
+    compile 'com.infstory:parse-compat:1.0.5'
+}
+```
+
 Or via jitpack.io
 
 ```gradle
