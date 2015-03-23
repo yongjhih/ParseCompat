@@ -30,9 +30,7 @@ Via bintray
 
 ```gradle
 repositories {
-    maven {
-        url 'https://dl.bintray.com/yongjhih/maven/'
-    }
+    jcenter()
 }
 
 dependencies {
