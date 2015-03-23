@@ -42,9 +42,18 @@ public class ParseRecyclerAdapter<T extends ParseObject, VH extends RecyclerView
     protected Context context;
     protected Action1<ParseRecyclerAdapter> onDataSetChanged;
     protected Action3<VH, Integer, T> mOnBindViewHolder;
+    protected ParseQueryAdapter.QueryFactory<T> mFactory;
+
+    public ParseRecyclerAdapter(Context context) {
+        this(context, null);
+    }
 
     public ParseRecyclerAdapter(Context context, ParseQueryAdapter.QueryFactory<T> factory) {
         this.context = context;
+        if (factory != null) query(factory); // instead of mFactory = factory if load on setAdapter;
+    }
+
+    public ParseRecyclerAdapter query(ParseQueryAdapter.QueryFactory<T> factory) {
         mParseAdapter = new ParseQueryAdapter<T>(context, factory) {
             @Override
             public View getItemView(T parseObject, View view, ViewGroup parent) {
@@ -64,7 +73,7 @@ public class ParseRecyclerAdapter<T extends ParseObject, VH extends RecyclerView
             ParseRecyclerAdapter.this.notifyDataSetChanged();
             if (onDataSetChanged != null) onDataSetChanged.call(ParseRecyclerAdapter.this);
         }));
-        mParseAdapter.loadObjects();
+        mParseAdapter.loadObjects(); // TODO reload() or load on setAdapter()
 
         Observable.zip(
                 mParseObjectSubject.asObservable(), // <- parseAdapterQuery.getItemView() <- parseAdapterQuery.getView()
@@ -77,6 +86,11 @@ public class ParseRecyclerAdapter<T extends ParseObject, VH extends RecyclerView
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeOn(AndroidSchedulers.mainThread())
             .subscribe();
+        return this;
+    }
+
+    public static <R extends ParseObject, V extends RecyclerView.ViewHolder> ParseRecyclerAdapter<R, V> from(Context context) {
+        return new ParseRecyclerAdapter<R, V>(context);
     }
 
     public ParseRecyclerAdapter onDataSetChanged(Action1<ParseRecyclerAdapter> onDataSetChanged) {
