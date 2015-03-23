@@ -35,7 +35,7 @@ repositories {
 }
 
 dependencies {
-    compile 'com.infstory:parse-compat:1.0.5'
+    compile 'com.infstory:parse-compat:1.0.0'
 }
 ```
 
