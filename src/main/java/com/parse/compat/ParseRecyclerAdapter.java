@@ -42,6 +42,7 @@ public class ParseRecyclerAdapter<T extends ParseObject, VH extends RecyclerView
     protected Context context;
     protected Action1<ParseRecyclerAdapter> onDataSetChanged;
     protected Action3<VH, Integer, T> mOnBindViewHolder;
+    protected Func2<ViewGroup, Integer, VH> mOnCreateViewHolder;
     protected ParseQueryAdapter.QueryFactory<T> mFactory;
 
     public ParseRecyclerAdapter(Context context) {
@@ -136,17 +137,19 @@ public class ParseRecyclerAdapter<T extends ParseObject, VH extends RecyclerView
         }
     }
 
-    /**
-     * super me
-     */
     @Override
-    public VH onCreateViewHolder(ViewGroup parent, int viewType) {
+    public VH onCreateViewHolder(ViewGroup parent, int viewType) { // final, DO NOT Override until certainly
         mParentViewGroup = parent;
-        return null;
+        return mOnCreateViewHolder.call(parent, new Integer(viewType)); // throw NullPointerException if mOnCreateViewHolder == null
+    }
+
+    public ParseRecyclerAdapter createViewHolder(Func2<ViewGroup, Integer, VH> onCreateViewHolder) {
+        mOnCreateViewHolder = onCreateViewHolder;
+        return this;
     }
 
     @Override
-    public void onBindViewHolder(VH viewHolder, int position) {
+    public void onBindViewHolder(VH viewHolder, int position) { // final, DO NOT Override until certainly
         mParseAdapter.getView(position, viewHolder.itemView, mParentViewGroup);
         mViewHolderSubject.onNext(viewHolder);
         mPositionSubject.onNext(new Integer(position));
@@ -154,11 +157,12 @@ public class ParseRecyclerAdapter<T extends ParseObject, VH extends RecyclerView
     }
 
     /** Super me if Override */
-    public void onBindViewHolder(VH viewHolder, int position, T parseObject) {
+    public void onBindViewHolder(VH viewHolder, int position, T parseObject) { // final, DO NOT Override until certainly
+        // throw NullPointerException? if mOnBindViewHolder == null
         if (mOnBindViewHolder != null) mOnBindViewHolder.call(viewHolder, new Integer(position), parseObject);
     }
 
-    public ParseRecyclerAdapter onBindViewHolder(Action3<VH, Integer, T> onBindViewHolder) {
+    public ParseRecyclerAdapter bindViewHolder(Action3<VH, Integer, T> onBindViewHolder) {
         mOnBindViewHolder = onBindViewHolder;
         return this;
     }

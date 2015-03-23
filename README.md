@@ -5,23 +5,16 @@
 
 ## Usage
 
-```java
-adapter = new ParseRecyclerAdapter<Post, MyViewHolder>(this, () -> {
-    ParseQuery<Post> query = Post.getQuery();
-    query.include(Post.USER);
-    return query;
-}) {
-    @Override public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        super.onCreateViewHolder(parent, viewType);
-        final View view = LayoutInflater.from(context).inflate(R.layout.item_view, parent, false);
-        ...
-        return viewHolder;
-    }
-};
+User List:
 
-adapter.onBindViewHolder((viewHolder, position, post) -> {
-    ...
-});
+```java
+ParseRecyclerAdapter<ParseUser, MyViewHolder> adapter = ParseRecyclerAdapter.from(activity)
+    .query(() -> ParseUser.getQuery())
+    .createViewHolder((parent, viewType) -> {
+        final View view = LayoutInflater.from(context).inflate(R.layout.item_view, parent, false);
+        return MyViewHolder.create(view, parent, viewType);
+    })
+    .bindViewHolder((viewHolder, position, parseUser) -> viewHolder.bind(position, parseUser));
 ```
 
 ## Installation
