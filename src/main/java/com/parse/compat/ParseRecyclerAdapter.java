@@ -40,7 +40,7 @@ public class ParseRecyclerAdapter<T extends ParseObject, VH extends RecyclerView
     private Subject<Integer, Integer> mPositionSubject = new SerializedSubject<>(PublishSubject.create());
     private ViewGroup mParentViewGroup;
     protected Context context;
-    protected Action1<ParseRecyclerAdapter> onDataSetChanged;
+    protected Action1<ParseRecyclerAdapter> mOnDataSetChanged;
     protected Action3<VH, Integer, T> mOnBindViewHolder;
     protected Func2<ViewGroup, Integer, VH> mOnCreateViewHolder;
     protected ParseQueryAdapter.QueryFactory<T> mFactory;
@@ -72,7 +72,7 @@ public class ParseRecyclerAdapter<T extends ParseObject, VH extends RecyclerView
         //mParseAdapter.setPaginationEnabled(false);
         mParseAdapter.addOnQueryLoadListener(new SimpleOnQueryLoadListener<T>((objects, e) -> {
             ParseRecyclerAdapter.this.notifyDataSetChanged();
-            if (onDataSetChanged != null) onDataSetChanged.call(ParseRecyclerAdapter.this);
+            if (mOnDataSetChanged != null) mOnDataSetChanged.call(ParseRecyclerAdapter.this);
         }));
         mParseAdapter.loadObjects(); // TODO reload() or load on setAdapter()
 
@@ -94,8 +94,8 @@ public class ParseRecyclerAdapter<T extends ParseObject, VH extends RecyclerView
         return new ParseRecyclerAdapter<R, V>(context);
     }
 
-    public ParseRecyclerAdapter onDataSetChanged(Action1<ParseRecyclerAdapter> onDataSetChanged) {
-        this.onDataSetChanged = onDataSetChanged;
+    public ParseRecyclerAdapter dataSetChanged(Action1<ParseRecyclerAdapter> onDataSetChanged) {
+        this.mOnDataSetChanged = onDataSetChanged;
         return this;
     }
 
