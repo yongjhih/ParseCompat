@@ -140,7 +140,9 @@ public class ParseRecyclerAdapter<T extends ParseObject, VH extends RecyclerView
     @Override
     public VH onCreateViewHolder(ViewGroup parent, int viewType) { // final, DO NOT Override until certainly
         mParentViewGroup = parent;
-        return mOnCreateViewHolder.call(parent, new Integer(viewType)); // throw NullPointerException if mOnCreateViewHolder == null
+        // throw NullPointerException if mOnCreateViewHolder == null
+        if (mOnCreateViewHolder != null) return mOnCreateViewHolder.call(parent, new Integer(viewType));
+        return null;
     }
 
     public ParseRecyclerAdapter createViewHolder(Func2<ViewGroup, Integer, VH> onCreateViewHolder) {
