@@ -5,7 +5,7 @@
 
 ## Usage
 
-User List:
+User List, directly:
 
 ```java
 ParseRecyclerAdapter<ParseUser, MyViewHolder> adapter = ParseRecyclerAdapter.from(activity)
@@ -15,6 +15,25 @@ ParseRecyclerAdapter<ParseUser, MyViewHolder> adapter = ParseRecyclerAdapter.fro
         return MyViewHolder.create(view, parent, viewType);
     })
     .bindViewHolder((viewHolder, position, parseUser) -> viewHolder.bind(position, parseUser));
+```
+
+Or inheritance ParseRecyclerAdapter
+
+```java
+public class ParseUserRecyclerAdapter extends ParseRecyclerAdapter<ParseUser, MyViewHolder>() {
+    ParseUserRecyclerAdapter(Context context) {
+        super(context);
+
+        query(() -> ParseUser.getQuery())
+        .createViewHolder((parent, viewType) -> {
+            final View view = LayoutInflater.from(context).inflate(R.layout.item_view, parent, false);
+            return MyViewHolder.create(view, parent, viewType);
+        })
+        .bindViewHolder((viewHolder, position, parseUser) -> viewHolder.bind(position, parseUser));
+    }
+}
+
+ParseRecyclerAdapter adapter = ParseRecyclerAdapter.from(activity);
 ```
 
 ## Installation
