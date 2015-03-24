@@ -19,7 +19,7 @@ ParseRecyclerAdapter<ParseUser, MyViewHolder> adapter = ParseRecyclerAdapter.fro
 
 ## Installation
 
-Via bintray
+Via jcenter
 
 ```gradle
 repositories {
@@ -27,7 +27,7 @@ repositories {
 }
 
 dependencies {
-    compile 'com.infstory:parse-compat:1.0.0'
+    compile 'com.infstory:parse-compat:1.0.1'
 }
 ```
 
@@ -41,7 +41,7 @@ repositories {
 }
 
 dependencies {
-    compile 'com.github.yongjhih:ParseCompat:1.0.0'
+    compile 'com.github.yongjhih:ParseCompat:1.0.1'
 }
 ```
 
