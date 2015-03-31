@@ -70,16 +70,21 @@ public class ParseRecyclerAdapter<T extends ParseObject, VH extends RecyclerView
         };
         // enable pagination until inflate layout for findTextViewById(android.R.id.text1) in getNextPage()
         //mParseAdapter.setPaginationEnabled(false);
-        mParseAdapter.addOnQueryLoadListener(new SimpleOnQueryLoadListener<T>((objects, e) -> {
-            ParseRecyclerAdapter.this.notifyDataSetChanged();
-            if (mOnDataSetChanged != null) mOnDataSetChanged.call(ParseRecyclerAdapter.this);
-        }));
+        mParseAdapter.addOnQueryLoadListener(new SimpleOnQueryLoadListener<T>()
+            .loaded((objects, e) -> {
+                if (lastItemCount == getItemCount()) return;
+                ParseRecyclerAdapter.this.notifyDataSetChanged();
+                if (mOnDataSetChanged != null) mOnDataSetChanged.call(ParseRecyclerAdapter.this);
+            }).loading(() -> {
+                lastItemCount = getItemCount();
+            }));
         mParseAdapter.loadObjects(); // TODO reload() or load on setAdapter()
 
         Observable.zip(
-                mParseObjectSubject.asObservable(), // <- parseAdapterQuery.getItemView() <- parseAdapterQuery.getView()
                 mViewHolderSubject.asObservable(), // <- onBindViewHolder(ViewHolder, ...)
-                mPositionSubject.asObservable(), (o, viewHolder, position) -> { // <- onBindViewHolder(..., position)
+                mPositionSubject.asObservable(), // <- onBindViewHolder(..., position)
+                mParseObjectSubject.asObservable(), // <- parseAdapterQuery.getItemView() <- parseAdapterQuery.getView()
+                (viewHolder, position, o) -> {
                     onBindViewHolder(viewHolder, position, o);
                     return o;
                 }
@@ -113,6 +118,9 @@ public class ParseRecyclerAdapter<T extends ParseObject, VH extends RecyclerView
             if (onLoaded != null) onLoaded.call(objects, e);
         }
 
+        public SimpleOnQueryLoadListener() {
+        }
+
         public SimpleOnQueryLoadListener(Action0 onLoading, Action2<List<R>, Exception> onLoaded) {
             this.onLoading = onLoading;
             this.onLoaded = onLoaded;
@@ -126,12 +134,12 @@ public class ParseRecyclerAdapter<T extends ParseObject, VH extends RecyclerView
             this.onLoaded = onLoaded;
         }
 
-        public SimpleOnQueryLoadListener onLoading(Action0 onLoading) {
+        public SimpleOnQueryLoadListener loading(Action0 onLoading) {
             this.onLoading = onLoading;
             return this;
         }
 
-        public SimpleOnQueryLoadListener onLoaded(Action2<List<R>, Exception> onLoaded) {
+        public SimpleOnQueryLoadListener loaded(Action2<List<R>, Exception> onLoaded) {
             this.onLoaded = onLoaded;
             return this;
         }
@@ -155,8 +163,12 @@ public class ParseRecyclerAdapter<T extends ParseObject, VH extends RecyclerView
         mParseAdapter.getView(position, viewHolder.itemView, mParentViewGroup);
         mViewHolderSubject.onNext(viewHolder);
         mPositionSubject.onNext(new Integer(position));
-        if (position >= getItemCount() - 1) mParseAdapter.loadNextPage();
+        if (lastItemCount != getItemCount()) {
+            if (position >= getItemCount() - 1) mParseAdapter.loadNextPage();
+        }
     }
+
+    int lastItemCount = -1;
 
     /** Super me if Override */
     public void onBindViewHolder(VH viewHolder, int position, T parseObject) { // final, DO NOT Override until certainly
@@ -171,7 +183,6 @@ public class ParseRecyclerAdapter<T extends ParseObject, VH extends RecyclerView
 
     @Override
     public int getItemCount() {
-        int i = mParseAdapter.getCount();
-        return i - 6;
+        return mParseAdapter.getCount();
     }
 }
