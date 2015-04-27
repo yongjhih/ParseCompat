@@ -98,6 +98,7 @@ public class ParseRecyclerAdapter<T extends ParseObject, VH extends RecyclerView
     }
 
     public ParseRecyclerAdapter<T, VH> reload() {
+        mOnQueryLoadListener.onLoading();
         mParseAdapter.loadObjects();
         return this;
     }
