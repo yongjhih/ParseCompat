@@ -80,7 +80,6 @@ public class ParseRecyclerAdapter<T extends ParseObject, VH extends RecyclerView
 
         mOnQueryLoadListener = new SimpleOnQueryLoadListener();
         mParseAdapter.addOnQueryLoadListener(mOnQueryLoadListener);
-        mParseAdapter.loadObjects(); // TODO reload() or load on setAdapter()
 
         Observable.zip(
                 mViewHolderSubject.asObservable(), // <- onBindViewHolder(ViewHolder, ...)
@@ -95,6 +94,11 @@ public class ParseRecyclerAdapter<T extends ParseObject, VH extends RecyclerView
             .subscribeOn(AndroidSchedulers.mainThread())
             .subscribe();
 
+        return this;
+    }
+
+    public ParseRecyclerAdapter<T, VH> reload() {
+        mParseAdapter.loadObjects();
         return this;
     }
 
@@ -150,12 +154,12 @@ public class ParseRecyclerAdapter<T extends ParseObject, VH extends RecyclerView
 
     private SimpleOnQueryLoadListener mOnQueryLoadListener;
 
-    public ParseRecyclerAdapter loading(Action0 onLoading) {
+    public ParseRecyclerAdapter<T, VH> loading(Action0 onLoading) {
         mOnQueryLoadListener.loading(onLoading);
         return this;
     }
 
-    public ParseRecyclerAdapter loaded(Action2<List<T>, Exception> onLoaded) {
+    public ParseRecyclerAdapter<T, VH> loaded(Action2<List<T>, Exception> onLoaded) {
         mOnQueryLoadListener.loaded(onLoaded);
         return this;
     }
