@@ -77,6 +77,9 @@ public class ParseRecyclerAdapter<T extends ParseObject, VH extends RecyclerView
                 ParseRecyclerAdapter.this.notifyDataSetChanged();
                 if (mOnDataSetChanged != null) mOnDataSetChanged.call(ParseRecyclerAdapter.this);
             }));
+
+        mOnQueryLoadListener = new SimpleOnQueryLoadListener();
+        mParseAdapter.addOnQueryLoadListener(mOnQueryLoadListener);
         mParseAdapter.loadObjects(); // TODO reload() or load on setAdapter()
 
         Observable.zip(
@@ -143,6 +146,18 @@ public class ParseRecyclerAdapter<T extends ParseObject, VH extends RecyclerView
             this.onLoaded = onLoaded;
             return this;
         }
+    }
+
+    private SimpleOnQueryLoadListener mOnQueryLoadListener;
+
+    public ParseRecyclerAdapter loading(Action0 onLoading) {
+        mOnQueryLoadListener.loading(onLoading);
+        return this;
+    }
+
+    public ParseRecyclerAdapter loaded(Action2<List<T>, Exception> onLoaded) {
+        mOnQueryLoadListener.loaded(onLoaded);
+        return this;
     }
 
     @Override
