@@ -35,9 +35,9 @@ import rx.subjects.*;
 
 public class ParseRecyclerAdapter<T extends ParseObject, VH extends RecyclerView.ViewHolder> extends RecyclerView.Adapter<VH> {
     private ParseQueryAdapter<T> mParseAdapter;
-    private Subject<T, T> mParseObjectSubject = new SerializedSubject<>(PublishSubject.create());
-    private Subject<VH, VH> mViewHolderSubject = new SerializedSubject<>(PublishSubject.create());
-    private Subject<Integer, Integer> mPositionSubject = new SerializedSubject<>(PublishSubject.create());
+    private Subject<T, T> mParseObjectSubject = PublishSubject.create();
+    private Subject<VH, VH> mViewHolderSubject = PublishSubject.create();
+    private Subject<Integer, Integer> mPositionSubject = PublishSubject.create();
     private ViewGroup mParentViewGroup;
     protected Context context;
     protected Action1<ParseRecyclerAdapter> mOnDataSetChanged;
@@ -58,25 +58,24 @@ public class ParseRecyclerAdapter<T extends ParseObject, VH extends RecyclerView
         mParseAdapter = new ParseQueryAdapter<T>(context, factory) {
             @Override
             public View getItemView(T parseObject, View view, ViewGroup parent) {
+                android.util.Log.d("Log8", "getItemView()");
                 mParseObjectSubject.onNext(parseObject);
                 super.getItemView(parseObject, view, parent);
                 return view;
             }
             @Override
             public View getNextPageView(View view, ViewGroup parent) {
-                loadNextPage();
+                android.util.Log.d("Log8", "getNextPageView()");
+                //loadNextPage();
                 return view;
             }
         };
         // enable pagination until inflate layout for findTextViewById(android.R.id.text1) in getNextPage()
-        //mParseAdapter.setPaginationEnabled(false);
+        mParseAdapter.setPaginationEnabled(false);
         mParseAdapter.addOnQueryLoadListener(new SimpleOnQueryLoadListener<T>()
             .loaded((objects, e) -> {
-                if (lastItemCount == getItemCount()) return;
                 ParseRecyclerAdapter.this.notifyDataSetChanged();
                 if (mOnDataSetChanged != null) mOnDataSetChanged.call(ParseRecyclerAdapter.this);
-            }).loading(() -> {
-                lastItemCount = getItemCount();
             }));
         mParseAdapter.loadObjects(); // TODO reload() or load on setAdapter()
 
@@ -92,6 +91,7 @@ public class ParseRecyclerAdapter<T extends ParseObject, VH extends RecyclerView
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeOn(AndroidSchedulers.mainThread())
             .subscribe();
+
         return this;
     }
 
@@ -149,7 +149,7 @@ public class ParseRecyclerAdapter<T extends ParseObject, VH extends RecyclerView
     public VH onCreateViewHolder(ViewGroup parent, int viewType) { // final, DO NOT Override until certainly
         mParentViewGroup = parent;
         // throw NullPointerException if mOnCreateViewHolder == null
-        if (mOnCreateViewHolder != null) return mOnCreateViewHolder.call(parent, new Integer(viewType));
+        if (mOnCreateViewHolder != null) return mOnCreateViewHolder.call(parent, viewType);
         return null;
     }
 
@@ -160,20 +160,17 @@ public class ParseRecyclerAdapter<T extends ParseObject, VH extends RecyclerView
 
     @Override
     public void onBindViewHolder(VH viewHolder, int position) { // final, DO NOT Override until certainly
+        android.util.Log.d("Log8", "position: [" + position + "]/" + mParseAdapter.getCount() + "/" + getItemCount());
+
         mParseAdapter.getView(position, viewHolder.itemView, mParentViewGroup);
         mViewHolderSubject.onNext(viewHolder);
-        mPositionSubject.onNext(new Integer(position));
-        if (lastItemCount != getItemCount()) {
-            if (position >= getItemCount() - 1) mParseAdapter.loadNextPage();
-        }
+        mPositionSubject.onNext(position);
     }
-
-    int lastItemCount = -1;
 
     /** Super me if Override */
     public void onBindViewHolder(VH viewHolder, int position, T parseObject) { // final, DO NOT Override until certainly
         // throw NullPointerException? if mOnBindViewHolder == null
-        if (mOnBindViewHolder != null) mOnBindViewHolder.call(viewHolder, new Integer(position), parseObject);
+        if (mOnBindViewHolder != null) mOnBindViewHolder.call(viewHolder, position, parseObject);
     }
 
     public ParseRecyclerAdapter bindViewHolder(Action3<VH, Integer, T> onBindViewHolder) {
